@@ -11,7 +11,7 @@ WHITESPACES = string.whitespace
 PUNCTUATION = string.punctuation
 ALL_PRINTABLE = string.printable
 
-TEST_MESSAGE = "ESTEESUNMENSAJEDEPRUEBA"
+TEST_MESSAGE = "THISISATESTMESSAGE"
 TEST_KEY = "KEY"
 
 
@@ -22,14 +22,12 @@ def cypher(message, key, alphabet, decrypt=False):
     :param key: secret password used to create the secret message, as a string
     :param alphabet: string containing all the valid characters
     :param decrypt: True if the message is already cyphered
-    :return the cyphered message
+    :return: the cyphered message
     """
-    keylen = len(key)
-    alphabetlen = len(alphabet)
-    add = lambda x, y: x + y
-    substract = lambda x, y: x - y
-    opp = substract if decrypt else add
-    secret = [alphabet[opp(alphabet.index(message[i]), alphabet.index(key[i % keylen])) % alphabetlen] for i in
+    key_len = len(key)
+    alphabet_len = len(alphabet)
+    opp = lambda x, y: x - y if decrypt else x + y
+    secret = [alphabet[opp(alphabet.index(message[i]), alphabet.index(key[i % key_len])) % alphabet_len] for i in
               range(len(message))]
     return ''.join(secret)
 
@@ -54,14 +52,14 @@ def hack_cypher(secret, alphabet, keylen=4):
     :param keylen: the maximum key length
     """
     if keylen > 8:
-        print("keylen to long")
+        print("The key's length is to long")
         return
     for klen in range(1, keylen + 1):
         for key in [''.join(c) for c in permutations(list(MAY), klen)]:
             if key_found(key, secret, alphabet):
                 print("Key guessed!")
                 return
-    print("Keylen is not enough")
+    print("The key's length was not enough to decrypt the message")
 
 
 def calculate_IC(message, alphabet):
@@ -81,13 +79,14 @@ def main():
     #message = raw_input('Write the message to cypher: ')
     #key = raw_input('Input the key: ')
 
-    #secretmessage = cypher(message, key, MAY)
-    #mes = cypher(secretmessage, key, string.ascii_uppercase, True)
+    #secret_message = cypher(message, key, MAY)
+    #mes = cypher(secret_message, key, MAY, True)
 
     secret_message = cypher(TEST_MESSAGE, TEST_KEY, alphabet)
+    print(secret_message)
     #hack_cypher(secret_message, alphabet, 3)
 
-    IC = calculate_IC(secret_message, alphabet)
-    print(IC)
+    #IC = calculate_IC(secret_message, alphabet)
+    #print(IC)
 
 main()
