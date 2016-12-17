@@ -11,9 +11,7 @@ WHITESPACES = string.whitespace
 PUNCTUATION = string.punctuation
 ALL_PRINTABLE = string.printable
 
-TEST_MESSAGE = "THISISATESTMESSAGE"
-TEST_KEY = "KEY"
-
+clear_message = ''
 
 def cypher(message, key, alphabet, decrypt=False):
     """
@@ -41,21 +39,22 @@ def key_found(key, secret, alphabet):
     :return: True if the key is valid, False otherwise
     """
     message = cypher(secret, key, alphabet, True)
-    return message == TEST_MESSAGE
+    return message == clear_message
 
 
-def hack_cypher(secret, alphabet, keylen=4):
+def hack_cypher(secret, alphabet, key_len=4):
     """
-    Tries to decrypt the secret message by brute force. This keep trying key combinations with different key length until keylen is reached.
+    Tries to decrypt the secret message by brute force. This keep trying key combinations with different key length
+    until key_len is reached.
     :param secret: the cyphered message
     :param alphabet: string containing all the valid characters
-    :param keylen: the maximum key length
+    :param key_len: the maximum key length
     """
-    if keylen > 8:
-        print("The key's length is to long")
+    if key_len > 8:
+        print("The key's maximum length is 8")
         return
-    for klen in range(1, keylen + 1):
-        for key in [''.join(c) for c in permutations(list(MAY), klen)]:
+    for n in range(1, key_len + 1):
+        for key in [''.join(c) for c in permutations(list(MAY), n)]:
             if key_found(key, secret, alphabet):
                 print("Key guessed!")
                 return
@@ -73,20 +72,60 @@ def calculate_IC(message, alphabet):
     return sum(addhoc_mult(message.count(letter)) for letter in alphabet) / addhoc_mult(len(message))
 
 
+def check_text(text, alphabet):
+    """
+    Check if all the characters of a text are contained the selected alphabet
+    :param text: the text to check
+    :param alphabet: all the possible characters
+    :return: True if the text is valid, False otherwise
+    """
+    for letter in text:
+        if letter not in alphabet:
+            return False
+    return True
+
+
+def select_value(alphabet, show_text, fail_text="Please, insert only characters from the alphabet selected before"):
+    """
+    Return text entered by the user from the system input. This checks that the input text is correct.
+    :param alphabet: All the possible characters of the text
+    :param show_text: The text to show in the prompt
+    :param fail_text: The text to show if there is a problem with the input.
+    :return: the text inserted by the user
+    """
+    while True:
+        message = raw_input(show_text)
+        if not check_text(message, alphabet):
+            print(fail_text)
+            continue
+        return message
+
+
 def main():
-    alphabet = MAY
+    alphabet = ''
 
-    #message = raw_input('Write the message to cypher: ')
-    #key = raw_input('Input the key: ')
+    print("Select the alphabet\n - u : uppercase letters\n - l : lowercase letters\n - n : numbers")
+    print(" - p : punctuation\n - w : whitespaces\n         p.e : ul means uppercase and lowercase")
+    s_alph = select_value('ulpnw', 'Components of the alphabet: ', "Please, insert only one or more of ulnpw")
 
-    #secret_message = cypher(message, key, MAY)
-    #mes = cypher(secret_message, key, MAY, True)
+    alphabet += MAY if 'u' in s_alph else ''
+    alphabet += MIN if 'l' in s_alph else ''
+    alphabet += NUMBERS if 'n' in s_alph else ''
+    alphabet += PUNCTUATION if 'p' in s_alph else ''
+    alphabet += WHITESPACES if 'w' in s_alph else ''
 
-    secret_message = cypher(TEST_MESSAGE, TEST_KEY, alphabet)
-    print(secret_message)
+    message = select_value(alphabet, 'Write the message to cypher: ')
+    global clear_message
+    clear_message = message
+    key = select_value(alphabet, 'Input the key: ')
+
+    secret_message = cypher(message, key, alphabet)
+    print('The encrypted message is: ' + secret_message)
+    #decrypted_message = cypher(secret_message, key, alphabet, True)
+
     #hack_cypher(secret_message, alphabet, 3)
-
     #IC = calculate_IC(secret_message, alphabet)
     #print(IC)
+
 
 main()
